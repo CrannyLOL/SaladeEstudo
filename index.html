@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppSaladeEstudo - Botões</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+
+        .row {
+            flex: 1;
+            display: flex;
+        }
+
+        .button {
+            flex: 1;
+            margin: 5px;
+            font-size: 1.5em;
+            border: 1px solid #000;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-color: #266c9b;
+            color: #fff;
+            border-radius: 15px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .button:active {
+            transform: scale(0.97);
+        }
+
+        #btn6 {
+            background-color: #fff;
+            color: #000;
+            cursor: default;
+        }
+
+        /* Notificação central */
+        #toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="row">
+        <div class="button" id="btn1">Estudo Autónomo</div>
+        <div class="button" id="btn2">PRAHF</div>
+        <div class="button" id="btn3">Saída Sala Aula</div>
+    </div>
+
+    <div class="row">
+        <div class="button" id="btn4">Elementos Avaliação</div>
+        <div class="button" id="btn6"></div>
+        <div class="button" id="btn5">Outros</div>
+    </div>
+
+    <!-- Toast central -->
+    <div id="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxLTHOWcrwTLuHWeZRlMTnjo66OcyNCVs",
+            authDomain: "appsaladeestudo.firebaseapp.com",
+            databaseURL: "https://appsaladeestudo-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "appsaladeestudo",
+            storageBucket: "appsaladeestudo.firebasestorage.app",
+            messagingSenderId: "842385891910",
+            appId: "1:842385891910:web:a860bdfa5f51eaedac2047",
+            measurementId: "G-EFQDXT17SB"
+        };
+
+        // Inicializa Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        const database = firebase.database();
+
+        // Formata data/hora
+        function formatarDataHora(date) {
+            const dia = String(date.getDate()).padStart(2, '0');
+            const mes = String(date.getMonth() + 1).padStart(2, '0');
+            const ano = date.getFullYear();
+            const hora = String(date.getHours()).padStart(2, '0');
+            const minuto = String(date.getMinutes()).padStart(2, '0');
+            return `${dia}-${mes}-${ano}#${hora}:${minuto}`;
+        }
+
+        // Mostra notificação no centro
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensagem;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Grava clique no Firebase
+        function gravarClique(botao) {
+            const agora = new Date();
+            const registro = `${botao}#${formatarDataHora(agora)}`;
+            database.ref('cliques').push(registro)
+                .then(() => {
+                    console.log('Registo guardado:', registro);
+                    mostrarToast(`Clique registado: ${botao}`);
+                })
+                .catch(err => console.error('Erro:', err));
+        }
+
+        // Eventos para botões ativos
+        const botoes = [
+            "Estudo Autónomo",
+            "PRAHF",
+            "Saída Sala Aula",
+            "Elementos Avaliação",
+            "Outros"
+        ];
+
+        const ids = ["btn1","btn2","btn3","btn4","btn5"];
+
+        for(let i = 0; i < botoes.length; i++){
+            document.getElementById(ids[i]).addEventListener('click', () => gravarClique(botoes[i]));
+        }
+
+        // btn6 é inativo
+    </script>
+</body>
+</html>
