@@ -10,6 +10,7 @@
             margin: 0;
             display: flex;
             flex-direction: column;
+            font-family: Arial, sans-serif;
         }
 
         .row {
@@ -29,18 +30,40 @@
             text-align: center;
             background-color: #266c9b;
             color: #fff;
-            border-radius: 15px; /* Pontas arredondadas */
+            border-radius: 15px;
             transition: background-color 0.2s, transform 0.1s;
         }
 
         .button:active {
-            transform: scale(0.97); /* Feedback visual ao clicar */
+            transform: scale(0.97);
         }
 
         #btn6 {
             background-color: #fff;
             color: #000;
             cursor: default;
+        }
+
+        /* Notificação central */
+        #toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #toast.show {
+            opacity: 1;
         }
     </style>
 </head>
@@ -57,6 +80,9 @@
         <div class="button" id="btn6"></div>
         <div class="button" id="btn5">Outros</div>
     </div>
+
+    <!-- Toast central -->
+    <div id="toast"></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -81,26 +107,39 @@
         const analytics = firebase.analytics();
         const database = firebase.database();
 
-        // Função para formatar data/hora
+        // Formata data/hora
         function formatarDataHora(date) {
             const dia = String(date.getDate()).padStart(2, '0');
             const mes = String(date.getMonth() + 1).padStart(2, '0');
             const ano = date.getFullYear();
             const hora = String(date.getHours()).padStart(2, '0');
             const minuto = String(date.getMinutes()).padStart(2, '0');
-            return `${dia}-${mes}-${ano}|${hora}:${minuto}`;
+            return `${dia}-${mes}-${ano}#${hora}:${minuto}`;
         }
 
-        // Função para gravar clique
+        // Mostra notificação no centro
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensagem;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Grava clique no Firebase
         function gravarClique(botao) {
             const agora = new Date();
-            const registro = `${botao}|${formatarDataHora(agora)}`;
+            const registro = `${botao}#${formatarDataHora(agora)}`;
             database.ref('cliques').push(registro)
-                .then(() => console.log('Registo guardado:', registro))
-                .catch((err) => console.error('Erro:', err));
+                .then(() => {
+                    console.log('Registo guardado:', registro);
+                    mostrarToast(`Clique registado: ${botao}`);
+                })
+                .catch(err => console.error('Erro:', err));
         }
 
-        // Adicionar eventos aos botões ativos
+        // Eventos para botões ativos
         const botoes = [
             "Estudo Autónomo",
             "PRAHF",
