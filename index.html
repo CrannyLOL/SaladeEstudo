@@ -107,7 +107,7 @@
         const analytics = firebase.analytics();
         const database = firebase.database();
 
-        // Formata data/hora
+        // Função para formatar a data e hora
         function formatarDataHora(date) {
             const dia = String(date.getDate()).padStart(2, '0');
             const mes = String(date.getMonth() + 1).padStart(2, '0');
@@ -117,7 +117,7 @@
             return `${dia}-${mes}-${ano}#${hora}:${minuto}`;
         }
 
-        // Mostra notificação no centro
+        // Mostra notificação central
         function mostrarToast(mensagem) {
             const toast = document.getElementById('toast');
             toast.textContent = mensagem;
@@ -130,16 +130,21 @@
         // Grava clique no Firebase
         function gravarClique(botao) {
             const agora = new Date();
-            const registro = `${botao}#${formatarDataHora(agora)}`;
+            const dataHora = formatarDataHora(agora);
+            const registro = {
+                botao: botao,
+                dataHora: dataHora
+            };
+
             database.ref('cliques').push(registro)
                 .then(() => {
                     console.log('Registo guardado:', registro);
                     mostrarToast(`Clique registado: ${botao}`);
                 })
-                .catch(err => console.error('Erro:', err));
+                .catch(err => console.error('Erro ao guardar:', err));
         }
 
-        // Eventos para botões ativos
+        // Adiciona eventos aos botões
         const botoes = [
             "Estudo Autónomo",
             "PRAHF",
@@ -158,3 +163,5 @@
     </script>
 </body>
 </html>
+s
+
